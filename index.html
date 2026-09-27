@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MATIAS - Selección de Temas e Interacción Persistente</title>
+  <!-- Favicon / Icono de pestaña -->
+  <link rel="icon" type="image/x-icon" href="Logo.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul-profundo: #3157A4;
+      --morado: #7357B8;
+      --turquesa: #35AFA0;
+      --fondo-claro: #F7F9FC;
+      --texto-oscuro: #263238;
+      --blanco: #FFFFFF;
+      --hover-bg: #EAEFF7;
+      --borde: #E2E8F0;
+      --alerta-rojo: #E53935;
+      --alerta-bg: #FFEBEE;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--fondo-claro);
+      color: var(--texto-oscuro);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- CONTENIDO PRINCIPAL --- */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* BARRA SUPERIOR CON LOGO Y CAMBIO DE ROL */
+    .topbar {
+      height: 68px;
+      background-color: var(--blanco);
+      border-bottom: 1px solid var(--borde);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 10px;
+      transition: background-color 0.2s ease;
+    }
+
+    .brand-container:hover {
+      background-color: var(--hover-bg);
+    }
+
+    /* Ajuste para máxima visibilidad del logo */
+    .brand-logo {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-logo img {
+      height: 100%;
+      width: auto;
+      max-width: 180px;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      color: var(--azul-profundo);
+    }
+
+    .role-switcher {
+      display: flex;
+      background-color: var(--fondo-claro);
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .role-btn {
+      border: none;
+      background: transparent;
+      padding: 7px 18px;
+      border-radius: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #64748B;
+      transition: all 0.2s;
+    }
+
+    .role-btn.active {
+      background-color: var(--azul-profundo);
+      color: var(--blanco);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* BARRA NAVEGADORA DE TEMAS (CHIPS) */
+    .topics-nav {
+      background-color: var(--blanco);
+      border-bottom: 1px solid var(--borde);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      scrollbar-width: thin;
+    }
+
+    .topics-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 6px;
+      white-space: nowrap;
+    }
+
+    .topic-chip {
+      background-color: var(--fondo-claro);
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topic-chip:hover {
+      background-color: var(--hover-bg);
+      border-color: var(--azul-profundo);
+      color: var(--azul-profundo);
+    }
+
+    .topic-chip.active {
+      background-color: var(--azul-profundo);
+      color: var(--blanco);
+      border-color: var(--azul-profundo);
+      box-shadow: 0 2px 6px rgba(49, 87, 164, 0.25);
+    }
+
+    /* CONTENEDOR DE VISTAS (PÁGINAS) */
+    .view-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* --- VISTA DASHBOARD DOCENTE --- */
+    .dashboard-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .dashboard-header {
+      margin-bottom: 24px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--texto-oscuro);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background-color: var(--blanco);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .metric-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      background-color: rgba(49, 87, 164, 0.1);
+      color: var(--azul-profundo);
+    }
+
+    .metric-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      color: #64748B;
+    }
+
+    .sections-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+
+    .card {
+      background-color: var(--blanco);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: var(--texto-oscuro);
+    }
+
+    .progress-item {
+      margin-bottom: 14px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background-color: var(--fondo-claro);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--azul-profundo), var(--turquesa));
+      border-radius: 4px;
+    }
+
+    .alert-item {
+      background-color: var(--alerta-bg);
+      border-left: 4px solid var(--alerta-rojo);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    /* --- VISTA CHAT ESTUDIANTE --- */
+    .student-view-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .problem-card {
+      background-color: var(--blanco);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      border-left: 5px solid var(--azul-profundo);
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-right: 8px;
+      margin-bottom: 16px;
+    }
+
+    .phase-tag {
+      align-self: center;
+      background-color: var(--blanco);
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--azul-profundo);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      margin: 6px 0;
+    }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 88%;
+    }
+
+    .message.matias { align-self: flex-start; }
+    .message.student { align-self: flex-end; flex-direction: row-reverse; }
+
+    .message-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .message.matias .message-avatar {
+      background: linear-gradient(135deg, var(--azul-profundo), var(--turquesa));
+      color: var(--blanco);
+    }
+
+    .message.student .message-avatar {
+      background-color: var(--texto-oscuro);
+      color: var(--blanco);
+    }
+
+    .message-content {
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .message.matias .message-content {
+      background-color: var(--blanco);
+      border: 1px solid var(--borde);
+      border-left: 4px solid var(--turquesa);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .message.student .message-content {
+      background-color: var(--azul-profundo);
+      color: var(--blanco);
+    }
+
+    .message.cierre .message-content {
+      background-color: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      border-left: 5px solid #22C55E;
+      color: #14532D;
+    }
+
+    .chat-input-area {
+      display: flex;
+      gap: 10px;
+      background-color: var(--blanco);
+      border: 1px solid var(--borde);
+      border-radius: 28px;
+      padding: 6px 18px;
+      align-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 10px 4px;
+      font-size: 0.92rem;
+    }
+
+    .send-btn {
+      background-color: var(--turquesa);
+      color: var(--blanco);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .hint-btn {
+      background: none;
+      border: 1px solid var(--borde);
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--azul-profundo);
+      transition: background 0.2s;
+    }
+
+    .hint-btn:hover {
+      background-color: var(--hover-bg);
+    }
+
+    /* --- MODAL INFORMATIVO COMPLETO Y FIEL A LA FASE 2 --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--blanco);
+      border-radius: 16px;
+      max-width: 850px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      animation: modalFadeIn 0.25s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--borde);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #FAFAFC;
+    }
+
+    .modal-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--texto-oscuro);
+    }
+
+    .close-modal-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #64748B;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .close-modal-btn:hover {
+      background-color: var(--hover-bg);
+      color: var(--texto-oscuro);
+    }
+
+    .modal-body {
+      padding: 28px 32px;
+      overflow-y: auto;
+      line-height: 1.6;
+      color: #334155;
+      font-size: 0.95rem;
+    }
+
+    .modal-banner {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #F8FAFC, #EEF2FF);
+      border-radius: 12px;
+      border: 1px solid var(--borde);
+    }
+
+    .modal-banner img {
+      max-width: 100%;
+      max-height: 130px;
+      object-fit: contain;
+    }
+
+    .modal-tagline {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--azul-profundo);
+      text-align: center;
+      margin-bottom: 22px;
+      padding: 12px 18px;
+      background-color: #EBF3FE;
+      border-radius: 8px;
+      border-left: 4px solid var(--azul-profundo);
+    }
+
+    .modal-section {
+      margin-bottom: 24px;
+      border-bottom: 1px solid #F1F5F9;
+      padding-bottom: 18px;
+    }
+
+    .modal-section:last-child {
+      border-bottom: none;
+    }
+
+    .modal-section h3 {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--texto-oscuro);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-section p {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+
+    .modal-section ul {
+      margin-left: 20px;
+      margin-bottom: 10px;
+    }
+
+    .modal-section li {
+      margin-bottom: 6px;
+    }
+
+    .question-box {
+      background-color: #FFFBEB;
+      border-left: 4px solid #F59E0B;
+      padding: 16px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      color: #78350F;
+      margin: 20px 0;
+      font-size: 1.02rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANEL PRINCIPAL -->
+  <main class="main-content">
+    
+    <!-- BARRA SUPERIOR CON LOGO INTERACTIVO Y CAMBIO DE ROL -->
+    <header class="topbar">
+      <div class="brand-container" onclick="openAboutModal()" title="Haz clic para conocer la propuesta de solución MATIAS">
+        <div class="brand-logo">
+          <img src="Logo corto sf.png" alt="MATIAS Logo">
+        </div>
+        <div class="brand-title">MATIAS</div>
+      </div>
+
+      <!-- INTERRUPTOR DE ROL PARA PROTOTIPO -->
+      <div class="role-switcher">
+        <button class="role-btn" id="btn-docente" onclick="switchRole('docente')">👩‍🏫 Vista Docente</button>
+        <button class="role-btn active" id="btn-estudiante" onclick="switchRole('estudiante')">🧑‍🎓 Vista Estudiante</button>
+      </div>
+    </header>
+
+    <!-- BARRA NAVEGADORA DE TEMAS (CHIPS) -->
+    <nav class="topics-nav">
+      <span class="topics-label">Temas:</span>
+      <button class="topic-chip" onclick="selectTopic('fracciones', this)">
+        <span>🍕</span> Fracciones y Razones
+      </button>
+      <button class="topic-chip active" id="chip-porcentajes" onclick="selectTopic('porcentajes', this)">
+        <span>🏷️</span> Porcentajes y Descuentos
+      </button>
+      <button class="topic-chip" onclick="selectTopic('ecuaciones', this)">
+        <span>⚖️</span> Ecuaciones de 1er Grado
+      </button>
+      <button class="topic-chip" onclick="selectTopic('geometria', this)">
+        <span>📐</span> Áreas y Perímetros
+      </button>
+      <button class="topic-chip" onclick="selectTopic('proporciones', this)">
+        <span>📊</span> Regla de Tres
+      </button>
+    </nav>
+
+    <!-- PÁGINA 1: DASHBOARD DOCENTE -->
+    <div class="view-panel" id="view-docente">
+      <div class="dashboard-container">
+        <div class="dashboard-header">
+          <h1>Hola, Ale 👋</h1>
+          <p style="color: #64748B; font-size: 0.9rem;">Resumen de actividad y avances de tus grupos</p>
+        </div>
+
+        <!-- METRICAS CLAVE -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon">👥</div>
+            <div>
+              <div class="metric-value">36</div>
+              <div class="metric-label">Estudiantes</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">📚</div>
+            <div>
+              <div class="metric-value">12</div>
+              <div class="metric-label">Temas</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">🧮</div>
+            <div>
+              <div class="metric-value">24</div>
+              <div class="metric-label">Problemas</div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">🤖</div>
+            <div>
+              <div class="metric-value">86%</div>
+              <div class="metric-label">Autonomía</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENIDO DE ANÁLISIS -->
+        <div class="sections-grid">
+          <div class="card">
+            <div class="card-title">Progreso del Grupo por Tema</div>
+            
+            <div class="progress-item">
+              <div class="progress-info"><span>Fracciones y Razones</span><span>78%</span></div>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 78%;"></div></div>
+            </div>
+
+            <div class="progress-item">
+              <div class="progress-info"><span>Porcentajes y Descuentos (Activo)</span><span>61%</span></div>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 61%;"></div></div>
+            </div>
+
+            <div class="progress-item">
+              <div class="progress-info"><span>Ecuaciones de Primer Grado</span><span>52%</span></div>
+              <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 52%;"></div></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-title">⚠️ Atención Requerida</div>
+              <div class="alert-item">
+                <strong>8 estudiantes</strong> requieren reforzar simplificación de fracciones.
+              </div>
+              <div class="alert-item" style="background-color: #FFF8E1; border-color: #FFA000;">
+                <strong>3 estudiantes</strong> tuvieron errores al aplicar suma en lugar de resta en descuentos.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">🌱 Contexto Activo</div>
+              <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 8px;"><strong>Comercio local y Consumo:</strong> Análisis de precios, impuestos y descuentos en compras reales.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA 2: EXPERIENCIA DEL ESTUDIANTE (CHAT SOCRÁTICO) -->
+    <div class="view-panel active" id="view-estudiante" style="height: calc(100vh - 110px);">
+      <div class="student-view-container">
+        
+        <!-- TARJETA DE PROBLEMA -->
+        <div class="problem-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="problem-category" style="font-size: 0.78rem; font-weight: 700; color: var(--morado); text-transform: uppercase;">🛒 Consumo Responsable — Porcentajes y Descuentos</div>
+            <button class="hint-btn" onclick="autoFillNext()">Simular siguiente respuesta ➔</button>
+          </div>
+          <div id="problem-statement" style="font-weight: 600; font-size: 0.98rem; margin-top: 6px;">
+            Una playera cuesta $200 y tiene un descuento del 10%. ¿Cuál será su precio final?
+          </div>
+        </div>
+
+        <!-- HISTORIAL DEL CHAT -->
+        <div class="chat-messages" id="chat-box"></div>
+
+        <!-- ENTRADA DE RESPUESTA -->
+        <div class="chat-input-area">
+          <input type="text" id="user-input" placeholder="Escribe tu respuesta aquí..." onkeydown="if(event.key === 'Enter') handleSend()" />
+          <button class="send-btn" onclick="handleSend()">➔</button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL DE INFORMACIÓN FIEL A LA FASE 2 -->
+  <div class="modal-overlay" id="about-modal" onclick="closeAboutModalOnOverlay(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Fase 2: Diseño y Propuesta de Solución - MATIAS</h2>
+        <button class="close-modal-btn" onclick="closeAboutModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="modal-banner">
+          <img src="Logo largo sf.png" alt="MATIAS - Logo Largo">
+        </div>
+
+        <div class="modal-tagline">
+          Lema del proyecto: “MATIAS no resuelve el problema por ti; te ayuda a descubrir cómo resolverlo.”
+        </div>
+
+        <div class="modal-section">
+          <h3>1. Nombre y descripción del proyecto</h3>
+          <p>
+            <strong>MATIAS: Matemáticas, Tecnología, Inteligencia Artificial y Aprendizaje Socrático</strong> es una herramienta tecnológica diseñada para apoyar la construcción del conocimiento matemático en estudiantes de educación media superior. El proyecto surge como respuesta a las dificultades que algunos estudiantes presentan para consolidar conocimientos matemáticos básicos y continuar construyendo nuevos aprendizajes, así como al reto que representa el acceso inmediato a respuestas mediante herramientas de Inteligencia Artificial.
+          </p>
+          <p>
+            La propuesta consiste en utilizar la Inteligencia Artificial como un acompañamiento para el estudiante, pero con un enfoque diferente al de las herramientas que proporcionan directamente una respuesta. MATIAS funcionará como una especie de tutor socrático de matemáticas: realizará preguntas, proporcionará pistas, orientará al estudiante cuando encuentre una dificultad y le ayudará a revisar sus procedimientos, buscando que sea el propio estudiante quien construya la solución.
+          </p>
+          <p>
+            La herramienta también buscará adaptarse a las necesidades de cada estudiante. Cuando se presente una dificultad, MATIAS podrá ayudar a identificar si existe algún conocimiento previo que necesita fortalecerse y orientar al estudiante hacia explicaciones, ejemplos y ejercicios que le permitan recuperarlo. De esta manera, el objetivo no será solamente resolver una actividad, sino comprender el proceso que permite llegar a una respuesta.
+          </p>
+          <p>
+            El proyecto también considera que no todos los estudiantes cuentan con las mismas condiciones para acceder a la tecnología. Por ello, MATIAS podría utilizarse desde los dispositivos personales de los estudiantes, pero también estaría disponible mediante equipos proporcionados por la escuela para quienes no cuenten con teléfono, computadora o conexión a internet en casa.
+          </p>
+          <p>
+            Además, los contenidos y problemas matemáticos podrían relacionarse con situaciones reales de diferentes comunidades, permitiendo incorporar las experiencias y conocimientos de los propios estudiantes. A través de una red de colaboración, también sería posible compartir problemas y estrategias con estudiantes de otras escuelas y países, con el propósito de conocer diferentes formas de analizar y resolver una misma situación.
+          </p>
+        </div>
+
+        <div class="modal-section">
+          <h3>2. Público objetivo</h3>
+          <p>
+            El proyecto estará dirigido principalmente a estudiantes de educación media superior, especialmente a aquellos que presentan dificultades para consolidar conocimientos matemáticos básicos y que necesitan fortalecer aprendizajes previos para continuar avanzando.
+          </p>
+          <p>
+            Sin embargo, MATIAS no estaría limitado únicamente a estudiantes con dificultades. También podría utilizarse como una herramienta de acompañamiento para cualquier estudiante que quiera practicar, profundizar en un tema o comprobar la comprensión de un procedimiento.
+          </p>
+          <p>
+            Los docentes también formarían parte del proyecto, ya que podrían utilizar la información obtenida durante el proceso para identificar dificultades frecuentes, conocer los avances de sus estudiantes y fortalecer determinados contenidos dentro del aula.
+          </p>
+        </div>
+
+        <div class="modal-section">
+          <h3>3. Uso concreto de la Inteligencia Artificial</h3>
+          <p>
+            La Inteligencia Artificial será uno de los elementos principales de MATIAS, pero su función será diferente a la de un sistema que solamente proporciona respuestas.
+          </p>
+          <p>
+            MATIAS utilizará un enfoque de aprendizaje socrático, por lo que ante una actividad matemática comenzará orientando al estudiante mediante preguntas. Podría preguntarle qué información proporciona el problema, qué necesita encontrar, qué conocimientos considera que pueden ayudarle o qué procedimiento podría utilizar.
+          </p>
+          <p>
+            Si el estudiante comete un error, la herramienta no necesariamente le proporcionará inmediatamente la respuesta correcta. En su lugar, podrá hacer preguntas que le permitan identificar dónde se encuentra el error y pensar en una forma de corregirlo. Conforme avance, podrá proporcionar pistas o ejemplos cuando sean necesarios.
+          </p>
+          <p>
+            Al finalizar una actividad, MATIAS podrá pedir al estudiante que explique cómo llegó a su resultado y que compruebe si la respuesta realmente corresponde a lo que se estaba preguntando. De esta manera, la Inteligencia Artificial acompañará diferentes momentos del proceso de aprendizaje: comprender el problema, elegir un procedimiento, desarrollarlo, revisar los errores, explicar el resultado y comprobarlo.
+          </p>
+          <p>
+            <em>El propósito será que la tecnología no piense por el estudiante, sino que lo ayude a pensar.</em>
+          </p>
+        </div>
+
+        <div class="modal-section">
+          <h3>4. Estrategia de sostenibilidad</h3>
+          <p>
+            La sostenibilidad estará presente tanto en los contenidos utilizados por MATIAS como en la manera en que los estudiantes aplican sus conocimientos.
+          </p>
+          <p>
+            La herramienta podrá utilizar situaciones relacionadas con el consumo de agua, energía, alimentos, materiales y otros recursos para plantear problemas matemáticos. Esto permitirá que los estudiantes utilicen operaciones, porcentajes, proporciones, estadística y otros conocimientos matemáticos para analizar situaciones de su entorno.
+          </p>
+          <p>
+            De esta manera, las matemáticas podrán dejar de percibirse solamente como ejercicios realizados dentro del aula y convertirse en una herramienta para comprender situaciones reales y tomar decisiones relacionadas con el uso responsable de los recursos.
+          </p>
+          <p>
+            También se buscará que el proyecto pueda mantenerse dentro de las instituciones educativas mediante el aprovechamiento de los recursos tecnológicos disponibles en las escuelas. El objetivo será que MATIAS pueda integrarse progresivamente a los procesos educativos y no dependa únicamente de que cada estudiante tenga recursos tecnológicos propios.
+          </p>
+        </div>
+
+        <div class="modal-section">
+          <h3>5. Enfoque de diversidad cultural</h3>
+          <p>
+            MATIAS reconocerá que los estudiantes provienen de diferentes comunidades y que llegan al aula con experiencias y conocimientos que pueden contribuir a su aprendizaje.
+          </p>
+          <p>
+            Por ello, los problemas matemáticos podrán relacionarse con actividades y situaciones propias de diferentes contextos, como el comercio, la agricultura, las artesanías, la elaboración de alimentos, la construcción o la administración de recursos.
+          </p>
+          <p>
+            Además, los estudiantes podrán aportar situaciones de su propia comunidad para convertirlas en problemas matemáticos. Esto permitirá que sus experiencias sean consideradas como un punto de partida para construir nuevos conocimientos.
+          </p>
+          <p>
+            El proyecto también buscará mostrar que una misma situación puede analizarse de diferentes maneras dependiendo del contexto. Al compartir diferentes procedimientos y experiencias, los estudiantes podrán conocer otras formas de comprender y resolver problemas.
+          </p>
+        </div>
+
+        <div class="modal-section">
+          <h3>6. Modelo de colaboración internacional</h3>
+          <p>
+            MATIAS podrá incorporar una red de colaboración entre estudiantes y docentes de diferentes escuelas y países. En esta red, los participantes podrán compartir problemas matemáticos relacionados con situaciones de sus propias comunidades, así como los procedimientos que utilizaron para resolverlos.
+          </p>
+          <p>
+            Por ejemplo, diferentes grupos podrían analizar un problema relacionado con el consumo de agua. Cada grupo trabajaría con información de su propio contexto y posteriormente compartiría sus procedimientos y resultados. Los estudiantes podrían comparar las diferentes formas de abordar el problema, identificar semejanzas y diferencias y reflexionar sobre las razones por las que pueden existir distintas estrategias para llegar a una solución.
+          </p>
+          <p>
+            La Inteligencia Artificial podría apoyar este intercambio organizando la información y ayudando a plantear preguntas para que los estudiantes reflexionen sobre las diferentes respuestas y procedimientos. Sin embargo, nuevamente, su función sería acompañar el análisis y no sustituir el razonamiento de los estudiantes.
+          </p>
+        </div>
+
+        <div class="question-box">
+          ¿Obtener una respuesta significa realmente haber construido conocimiento?
+        </div>
+
+        <div class="modal-section">
+          <h3>Propósito general</h3>
+          <p>
+            En conjunto, MATIAS busca transformar la manera en que los estudiantes se relacionan con el conocimiento matemático. La intención no es utilizar la tecnología para obtener respuestas de manera más rápida, sino utilizarla para generar un proceso de aprendizaje en el que el estudiante pueda comprender, cuestionar, razonar, equivocarse, corregir, explicar y comprobar.
+          </p>
+          <p>
+            MATIAS parte de la idea de que una respuesta correcta es solamente una parte del aprendizaje. Lo importante es que el estudiante pueda comprender cómo llegó a ella y utilizar ese conocimiento nuevamente en diferentes situaciones.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const topicsData = {
+      porcentajes: {
+        category: "🛒 Consumo Responsable — Porcentajes y Descuentos",
+        statement: "Una playera cuesta $200 y tiene un descuento del 10%. ¿Cuál será su precio final?",
+        script: [
+          {
+            expected: "Una playera cuesta $200 y tiene un descuento del 10%.",
+            responses: [{ type: 'matias', text: "Muy bien. ¿Qué necesitamos encontrar?" }]
+          },
+          {
+            expected: "El precio final de la playera.",
+            responses: [
+              { type: 'matias', text: "Exactamente. Vamos a descubrirlo paso a paso." },
+              { type: 'phase', text: "🔵 2. IDENTIFICAR" },
+              { type: 'matias', text: "¿Qué datos importantes puedes identificar?" }
+            ]
+          },
+          {
+            expected: "El precio es de $200 y el descuento es del 10%.",
+            responses: [{ type: 'matias', text: "Correcto. Ahora, ¿qué significa ese 10%?" }]
+          },
+          {
+            expected: "Que son 10 de cada 100.",
+            responses: [{ type: 'matias', text: "Muy bien. Entonces, ¿cómo podríamos encontrar cuánto representan esos 10 de cada 100 en $200?" }]
+          },
+          {
+            expected: "Multiplicando 200 por 10.",
+            responses: [{ type: 'matias', text: "Es un buen comienzo. ¿Qué necesitamos hacer después para considerar que estamos trabajando con un porcentaje?" }]
+          },
+          {
+            expected: "Dividir entre 100.",
+            responses: [
+              { type: 'matias', text: "Exactamente. Inténtalo." },
+              { type: 'phase', text: "🟣 3. PENSAR" }
+            ]
+          },
+          {
+            expected: "200 × 10 = 2000. 2000 ÷ 100 = 20.",
+            responses: [{ type: 'matias', text: "¿Qué representan esos $20?" }]
+          },
+          {
+            expected: "El descuento.",
+            responses: [
+              { type: 'matias', text: "Correcto. Ahora podemos continuar." },
+              { type: 'phase', text: "🟡 4. INTENTAR — AQUÍ APARECE EL ERROR" },
+              { type: 'matias', text: "Si la playera cuesta $200 y el descuento es de $20, ¿cómo encontramos el precio final?" }
+            ]
+          },
+          {
+            expected: "200 + 20 = $220.",
+            responses: [{ type: 'matias', text: "Parece que encontraste una respuesta. Antes de decir si es correcta, pensemos juntos.\n\nSi tienes $200 y te hacen un descuento de $20, ¿estás pagando más o menos dinero que antes?" }]
+          },
+          {
+            expected: "Menos.",
+            responses: [{ type: 'matias', text: "Entonces, ¿qué operación tendría sentido: sumar o restar el descuento?" }]
+          },
+          {
+            expected: "Restar.",
+            responses: [{ type: 'matias', text: "¿Por qué?" }]
+          },
+          {
+            expected: "Porque el descuento reduce el precio.",
+            responses: [{ type: 'matias', text: "Exactamente. Intenta nuevamente." }]
+          },
+          {
+            expected: "200 − 20 = $180.",
+            responses: [{ type: 'matias', text: "Ahora sí. ¿Qué representa $180?" }]
+          },
+          {
+            expected: "El precio final de la playera.",
+            responses: [
+              { type: 'phase', text: "🟠 5. REFLEXIONAR SOBRE EL ERROR" },
+              { type: 'matias', text: "Antes de continuar, quiero que pensemos en el error que cometiste.\n\nPrimero sumaste el descuento. ¿Qué te hizo pensar que debías sumar?" }
+            ]
+          },
+          {
+            expected: "Pensé que tenía que agregar los $20 que calculé.",
+            responses: [{ type: 'matias', text: "Y después, ¿qué te ayudó a darte cuenta de que debías restarlos?" }]
+          },
+          {
+            expected: "Pensar en lo que significa un descuento. Si me descuentan dinero, pago menos.",
+            responses: [
+              { type: 'matias', text: "Muy bien. El error te ayudó a comprender qué significa realmente un descuento." },
+              { type: 'phase', text: "🟤 6. EXPLICAR" },
+              { type: 'matias', text: "Ahora explica con tus propias palabras cómo resolviste el problema." }
+            ]
+          },
+          {
+            expected: "Primero calculé el 10% de $200 y obtuve $20. Después comprendí que un descuento significa pagar menos, así que resté $20 a los $200. El precio final es de $180.",
+            responses: [
+              { type: 'matias', text: "Muy bien. Ahora no solamente tienes el resultado, también puedes explicar por qué utilizaste cada operación." },
+              { type: 'phase', text: "🔴 7. COMPROBAR" },
+              { type: 'matias', text: "¿Cómo podemos comprobar tu respuesta?" }
+            ]
+          },
+          {
+            expected: "Sumando el descuento al precio final.",
+            responses: [{ type: 'matias', text: "Hazlo." }]
+          },
+          {
+            expected: "180 + 20 = 200.",
+            responses: [{ type: 'matias', text: "¿Coincide con el precio original?" }]
+          },
+          {
+            expected: "Sí.",
+            responses: [
+              { type: 'matias', text: "Entonces tu respuesta tiene sentido." },
+              { type: 'phase', text: "🎓 CIERRE" },
+              { type: 'cierre', text: "Hoy cometiste un error y lo utilizaste para aprender.\n\nTu proceso:\n✓ Comprendiste el problema\n✓ Identificaste los datos\n✓ Calculaste el porcentaje\n✓ Cometiste un error\n✓ Reflexionaste sobre él\n✓ Corregiste tu procedimiento\n✓ Explicaste tu razonamiento\n✓ Comprobaste tu resultado" },
+              { type: 'phase', text: "💭 REFLEXIÓN FINAL" },
+              { type: 'matias', text: "¿Qué fue más importante hoy: obtener $180 o comprender por qué $180 es la respuesta?" }
+            ]
+          },
+          {
+            expected: "Comprender por qué es la respuesta.",
+            responses: [{ type: 'cierre', text: "Exactamente.\n\n“El error no es el final del aprendizaje. Puede ser el comienzo de una nueva pregunta.”\n\n— MATIAS🤖" }]
+          }
+        ]
+      },
+      fracciones: {
+        category: "🍕 Reparto Justo — Fracciones y Razones",
+        statement: "En una fiesta, 3 amigos comparten 2 pizzas por igual. ¿Qué fracción de pizza le toca a cada uno?",
+        script: [
+          {
+            expected: "Hay 2 pizzas y son 3 amigos.",
+            responses: [{ type: 'matias', text: "¡Excelente observación! ¿Qué queremos averiguar?" }]
+          },
+          {
+            expected: "Cuánta pizza le toca a cada amigo.",
+            responses: [
+              { type: 'phase', text: "🔵 2. IDENTIFICAR" },
+              { type: 'matias', text: "Para repartir de forma equitativa, ¿qué operación debemos hacer entre el número de pizzas y el número de personas?" }
+            ]
+          },
+          {
+            expected: "Dividir las pizzas entre los amigos.",
+            responses: [
+              { type: 'phase', text: "🟣 3. PENSAR" },
+              { type: 'matias', text: "Exacto. Escribe esa división en forma de fracción." }
+            ]
+          },
+          {
+            expected: "2/3 de pizza.",
+            responses: [
+              { type: 'cierre', text: "¡Perfecto! A cada amigo le corresponden 2/3 de pizza. Has planteado la razón correctamente." }
+            ]
+          }
+        ]
+      },
+      ecuaciones: {
+        category: "⚖️ Equilibrio — Ecuaciones de 1er Grado",
+        statement: "Un número más 15 da como resultado 40. ¿Cuál es ese número?",
+        script: [
+          {
+            expected: "Necesitamos hallar el número desconocido.",
+            responses: [
+              { type: 'phase', text: "🔵 2. IDENTIFICAR" },
+              { type: 'matias', text: "Llamemos 'x' a ese número. ¿Cómo escribirías la ecuación completa?" }
+            ]
+          },
+          {
+            expected: "x + 15 = 40",
+            responses: [
+              { type: 'phase', text: "🟣 3. PENSAR" },
+              { type: 'matias', text: "¡Muy bien! Para despejar 'x', ¿qué operación hacemos con el 15 en ambos lados?" }
+            ]
+          },
+          {
+            expected: "Restar 15 a 40.",
+            responses: [
+              { type: 'matias', text: "Exacto, calcula x = 40 - 15." }
+            ]
+          },
+          {
+            expected: "x = 25",
+            responses: [
+              { type: 'cierre', text: "¡Excelente! El número desconocido es 25." }
+            ]
+          }
+        ]
+      },
+      geometria: {
+        category: "📐 Medición de Espacios — Áreas y Perímetros",
+        statement: "Un terreno rectangular mide 10 metros de largo y 5 metros de ancho. ¿Cuál es su área total?",
+        script: [
+          {
+            expected: "El largo es 10m y el ancho 5m.",
+            responses: [{ type: 'matias', text: "¿Cuál es la fórmula para calcular el área de un rectángulo?" }]
+          },
+          {
+            expected: "Base por altura (o largo por ancho).",
+            responses: [
+              { type: 'phase', text: "🟣 3. PENSAR" },
+              { type: 'matias', text: "Calcula el resultado multiplicando los datos." }
+            ]
+          },
+          {
+            expected: "10 x 5 = 50 metros cuadrados.",
+            responses: [
+              { type: 'cierre', text: "¡Muy bien! El área total del terreno es 50 m²." }
+            ]
+          }
+        ]
+      },
+      proporciones: {
+        category: "📊 Escalas y Proporciones — Regla de Tres",
+        statement: "Si 3 cuadernos cuestan $60, ¿cuánto costarán 7 cuadernos del mismo tipo?",
+        script: [
+          {
+            expected: "3 cuadernos cuestan $60.",
+            responses: [{ type: 'matias', text: "Primero, ¿cuánto cuesta un solo cuaderno?" }]
+          },
+          {
+            expected: "60 ÷ 3 = $20.",
+            responses: [
+              { type: 'phase', text: "🟣 3. PENSAR" },
+              { type: 'matias', text: "Perfecto. Ahora calcula cuánto cuestan 7 cuadernos." }
+            ]
+          },
+          {
+            expected: "20 x 7 = $140.",
+            responses: [
+              { type: 'cierre', text: "¡Excelente trabajo! 7 cuadernos cuestan $140." }
+            ]
+          }
+        ]
+      }
+    };
+
+    const topicStates = {};
+
+    Object.keys(topicsData).forEach(key => {
+      topicStates[key] = {
+        currentStep: 0,
+        historyHTML: `
+          <div class="phase-tag">🟢 1. COMPRENDER</div>
+          <div class="message matias">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">Lee con atención el problema. ¿Qué está sucediendo?</div>
+          </div>
+        `
+      };
+    });
+
+    let activeTopicKey = 'porcentajes';
+    const chatBox = document.getElementById('chat-box');
+    const input = document.getElementById('user-input');
+
+    renderTopicState(activeTopicKey);
+
+    function selectTopic(topicKey, element) {
+      topicStates[activeTopicKey].historyHTML = chatBox.innerHTML;
+      activeTopicKey = topicKey;
+
+      document.querySelectorAll('.topic-chip').forEach(chip => chip.classList.remove('active'));
+      element.classList.add('active');
+
+      renderTopicState(topicKey);
+    }
+
+    function renderTopicState(topicKey) {
+      document.getElementById('problem-category').innerText = topicsData[topicKey].category;
+      document.getElementById('problem-statement').innerText = topicsData[topicKey].statement;
+      chatBox.innerHTML = topicStates[topicKey].historyHTML;
+      chatBox.scrollTop = chatBox.scrollHeight;
+      input.value = '';
+    }
+
+    function switchRole(role) {
+      const viewDocente = document.getElementById('view-docente');
+      const viewEstudiante = document.getElementById('view-estudiante');
+      const btnDocente = document.getElementById('btn-docente');
+      const btnEstudiante = document.getElementById('btn-estudiante');
+
+      if (role === 'docente') {
+        topicStates[activeTopicKey].historyHTML = chatBox.innerHTML;
+        viewDocente.classList.add('active');
+        viewEstudiante.classList.remove('active');
+        btnDocente.classList.add('active');
+        btnEstudiante.classList.remove('active');
+      } else {
+        viewEstudiante.classList.add('active');
+        viewDocente.classList.remove('active');
+        btnEstudiante.classList.add('active');
+        btnDocente.classList.remove('active');
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
+
+    function autoFillNext() {
+      const state = topicStates[activeTopicKey];
+      const script = topicsData[activeTopicKey].script;
+      if (state.currentStep < script.length) {
+        input.value = script[state.currentStep].expected;
+      }
+    }
+
+    function handleSend() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage('student', '🧑‍🎓', text);
+      input.value = '';
+
+      const state = topicStates[activeTopicKey];
+      const script = topicsData[activeTopicKey].script;
+
+      if (state.currentStep < script.length) {
+        const stepData = script[state.currentStep];
+        state.currentStep++;
+
+        setTimeout(() => {
+          stepData.responses.forEach((resp, index) => {
+            setTimeout(() => {
+              if (resp.type === 'phase') {
+                appendPhaseTag(resp.text);
+              } else if (resp.type === 'cierre') {
+                appendMessage('cierre', '🎓', resp.text);
+              } else {
+                appendMessage('matias', '🤖', resp.text);
+              }
+            }, index * 600);
+          });
+        }, 600);
+      } else {
+        setTimeout(() => {
+          appendMessage('matias', '🤖', 'Has completado las preguntas de este tema. Puedes seleccionar otro tema arriba para continuar practicando.');
+        }, 600);
+      }
+    }
+
+    function appendMessage(sender, avatar, text) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
+      msgDiv.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-content">${text}</div>
+      `;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      topicStates[activeTopicKey].historyHTML = chatBox.innerHTML;
+    }
+
+    function appendPhaseTag(text) {
+      const tagDiv = document.createElement('div');
+      tagDiv.className = 'phase-tag';
+      tagDiv.innerText = text;
+      chatBox.appendChild(tagDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      topicStates[activeTopicKey].historyHTML = chatBox.innerHTML;
+    }
+
+    /* FUNCIONALIDAD DEL MODAL INFORMATIVO */
+    function openAboutModal() {
+      document.getElementById('about-modal').classList.add('active');
+    }
+
+    function closeAboutModal() {
+      document.getElementById('about-modal').classList.remove('active');
+    }
+
+    function closeAboutModalOnOverlay(event) {
+      if (event.target.classList.contains('modal-overlay')) {
+        closeAboutModal();
+      }
+    }
+  </script>
+</body>
+</html>
